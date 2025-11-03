@@ -6,8 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/revel/cron"
-	"github.com/revel/revel"
+	"github.com/str20tbl/cron"
+	"github.com/str20tbl/revel"
 )
 
 type Job struct {

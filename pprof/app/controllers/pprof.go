@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/revel/revel"
+	"github.com/str20tbl/revel"
 )
 
 type Pprof struct {

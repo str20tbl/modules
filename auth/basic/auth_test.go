@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	auth "github.com/revel/modules/auth/basic"
-	"github.com/revel/modules/auth/basic/driver/secret"
+	auth "github.com/str20tbl/modules/auth/basic"
+	"github.com/str20tbl/modules/auth/basic/driver/secret"
 )
 
 type User struct {

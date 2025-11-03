@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/revel/revel"
+	"github.com/str20tbl/revel"
 )
 
 var importPath *string = flag.String("revel.importPath", "", "Go Import Path for the app.")
@@ -21,7 +21,7 @@ func RevelTestHelper(m *testing.M, mode string, runner func(port int)) {
 		switch event {
 		case revel.REVEL_BEFORE_MODULES_LOADED:
 			revel.Config.SetOption("server.engine", "go-test")
-			revel.Config.SetOption("module.go-test", "github.com/revel/modules/server-engine/gohttptest")
+			revel.Config.SetOption("module.go-test", "github.com/str20tbl/modules/server-engine/gohttptest")
 		case revel.ENGINE_STARTED:
 			go func() {
 				// Wait for the server to send back a start response

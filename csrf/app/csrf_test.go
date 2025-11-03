@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/revel/revel"
-	"github.com/revel/revel/logger"
-	"github.com/revel/revel/session"
+	"github.com/str20tbl/revel"
+	"github.com/str20tbl/revel/logger"
+	"github.com/str20tbl/revel/session"
 )
 
 func NewTestController(w http.ResponseWriter, r *http.Request) *revel.Controller {

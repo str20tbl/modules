@@ -45,13 +45,13 @@ supports unit tests from the command line
 ## Learn More
 
 * [Manual, Samples, Godocs, etc](http://revel.github.io)
-* [Apps using Revel](https://github.com/revel/revel/wiki/Apps-in-the-Wild)
-* [Articles Featuring Revel](https://github.com/revel/revel/wiki/Articles)
+* [Apps using Revel](https://github.com/str20tbl/revel/wiki/Apps-in-the-Wild)
+* [Articles Featuring Revel](https://github.com/str20tbl/revel/wiki/Articles)
 
 ## Contributing
 
-* [Contributing Code Guidelines](https://github.com/revel/revel/blob/master/CONTRIBUTING.md)
-* [Revel Contributors](https://github.com/revel/revel/graphs/contributors)
+* [Contributing Code Guidelines](https://github.com/str20tbl/revel/blob/master/CONTRIBUTING.md)
+* [Revel Contributors](https://github.com/str20tbl/revel/graphs/contributors)
 
 ## Contributors
 

@@ -13,8 +13,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/revel/revel"
-	"github.com/revel/revel/testing"
+	"github.com/str20tbl/revel"
+	"github.com/str20tbl/revel/testing"
 )
 
 // TestRunner is a controller which is used for running application tests in browser.

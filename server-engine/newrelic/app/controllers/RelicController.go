@@ -2,8 +2,8 @@ package controllers
 
 import (
 	newrelic "github.com/newrelic/go-agent"
-	revelnewrelic "github.com/revel/modules/server-engine/newrelic"
-	"github.com/revel/revel"
+	revelnewrelic "github.com/str20tbl/modules/server-engine/newrelic"
+	"github.com/str20tbl/revel"
 )
 
 type RelicController struct {

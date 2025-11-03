@@ -10,7 +10,7 @@ composable parts*
 
 ## Activation
 ```ini
-module.gorp = github.com/revel/modules/orm/gorp
+module.gorp = github.com/str20tbl/modules/orm/gorp
 ```
 
 ## Drivers
@@ -38,7 +38,7 @@ db.connection=localhost port=8500 user=user dbname=mydb sslmode=disable password
 db.autoinit=true 
 ```
 ## Decelerations
-A global `Db *DbGorp` object is created in `github.com/revel/modules/gorp/app`.
+A global `Db *DbGorp` object is created in `github.com/str20tbl/modules/gorp/app`.
 The `Db` is initialized from the app.conf if `db.autoinit=true`.
  ```go
 // DB Gorp
@@ -59,8 +59,8 @@ If `db.autoinit=true` in app.conf then you can add your tables to Gorp on app st
 Note that the tables are added as a function using `gorp.Db.SetDbInit` - this is for database thread pooling
 ```go
 import (
-	"github.com/revel/revel"
-	"github.com/revel/modules/gorp/app"
+	"github.com/str20tbl/revel"
+	"github.com/str20tbl/modules/gorp/app"
 )
 func init() {
 	revel.OnAppStart(func(){
@@ -82,8 +82,8 @@ the global one that is created on startup
 package controllers
 
 import (
-	"github.com/revel/revel"
-	"github.com/revel/modules/orm/gorp/app/controllers"
+	"github.com/str20tbl/revel"
+	"github.com/str20tbl/modules/orm/gorp/app/controllers"
 )
 
 type App struct {
@@ -107,8 +107,8 @@ The gorp module can populate a `DbGorp` object for you from a `gorp.DbInfo` obje
 to use the global database (in the gorp module) you can initialize another anywhere in your project.
  ```go
 import (
-	"github.com/revel/revel"
-	"github.com/revel/modules/orm/gorp/app"
+	"github.com/str20tbl/revel"
+	"github.com/str20tbl/modules/orm/gorp/app"
 )
 var (
 SecondDb = &gorp.DbGorp{} 
@@ -137,8 +137,8 @@ must register the tables using `gorp.Db.SetDbInit`. This is the only way that th
 can properly initialize the newly thread created GORP instances. Here is an example.  
 ```go
 import (
-	"github.com/revel/revel"
-	"github.com/revel/modules/gorp/app"
+	"github.com/str20tbl/revel"
+	"github.com/str20tbl/modules/gorp/app"
 )
 func init() {
 	revel.OnAppStart(func(){

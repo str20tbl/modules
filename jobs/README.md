@@ -6,17 +6,17 @@ github:
     - topic-runtime
 ---
 
-The [`Jobs`](https://godoc.org/github.com/revel/modules/jobs/app/jobs) framework for performing work asynchronously, outside of the
+The [`Jobs`](https://godoc.org/github.com/str20tbl/modules/jobs/app/jobs) framework for performing work asynchronously, outside of the
 request flow.  This may take the form of [recurring tasks](#jobs) that updates cached data
 or [one-off tasks](#OneOff) such as sending emails.
 
 ## Activation
 
-The [`Jobs`](https://godoc.org/github.com/revel/modules/jobs/app/jobs) framework is included as an optional [module](index.html), and is not enabled by default.
+The [`Jobs`](https://godoc.org/github.com/str20tbl/modules/jobs/app/jobs) framework is included as an optional [module](index.html), and is not enabled by default.
 To activate it, add `module.jobs` to the [app.conf](../manual/appconf.html) file:
 
 ```ini
-module.jobs = github.com/revel/modules/jobs
+module.jobs = github.com/str20tbl/modules/jobs
 ```
 
 Additionally, in order to access the job monitoring page, you will need to add
@@ -37,7 +37,7 @@ to place on the jobs that it runs. These are listed below with their default val
 ## Implementing Jobs
 
 To create a Job, implement the [`cron.Job`](https://github.com/robfig/cron/) interface.  The
-[`Job`](https://godoc.org/github.com/revel/modules/jobs/app/jobs#Job) interface has the following signature:
+[`Job`](https://godoc.org/github.com/str20tbl/modules/jobs/app/jobs#Job) interface has the following signature:
 
 {% highlight go %}
 // https://github.com/robfig/cron/blob/master/cron.go
@@ -59,7 +59,7 @@ func (j MyJob) Run() {
 ## Startup jobs
 
 To run a task on application startup, use
-[`revel.OnAppStart()`](https://godoc.org/github.com/revel/revel#OnAppStart) to register a function.
+[`revel.OnAppStart()`](https://godoc.org/github.com/str20tbl/revel#OnAppStart) to register a function.
 Revel runs these tasks serially, before starting the server.  Note that this
 functionality does not actually use the jobs module, but it can be used to
 submit a job for execution that doesn't block server startup.
@@ -79,21 +79,21 @@ Jobs may be scheduled to run on any schedule.  There are two options for express
 1. A cron specification
 2. A fixed interval
 
-Revel uses the [`cron library`](https://godoc.org/github.com/revel/cron) to parse the
+Revel uses the [`cron library`](https://godoc.org/github.com/str20tbl/cron) to parse the
 schedule and run the jobs.  The library's
-[README](https://github.com/revel/cron/blob/master/README.md) provides a detailed
+[README](https://github.com/str20tbl/cron/blob/master/README.md) provides a detailed
 description of the format accepted.
 
 Jobs are generally registered using the
-[`revel.OnAppStart()`](https://godoc.org/github.com/revel/revel#OnAppStart) hook, but they may be
+[`revel.OnAppStart()`](https://godoc.org/github.com/str20tbl/revel#OnAppStart) hook, but they may be
 registered at any later time as well.
 
 Here are some examples:
 
 {% highlight go %}
 import (
-    "github.com/revel/revel"
-    "github.com/revel/modules/jobs/app/jobs"
+    "github.com/str20tbl/revel"
+    "github.com/str20tbl/modules/jobs/app/jobs"
     "time"
 )
 
@@ -169,7 +169,7 @@ func (c AppController) Action() revel.Result {
 
 ## Registering functions
 
-It is possible to register a `func()` as a job by wrapping it in the [`jobs.Func`](https://godoc.org/github.com/revel/modules/jobs/app/jobs#Func)
+It is possible to register a `func()` as a job by wrapping it in the [`jobs.Func`](https://godoc.org/github.com/str20tbl/modules/jobs/app/jobs#Func)
 type.  For example:
 
 {% highlight go %}

@@ -5,7 +5,7 @@ modules/gorm
 
 ## Activation
 ```ini
-module.gorm = github.com/revel/modules/orm/gorm
+module.gorm = github.com/str20tbl/modules/orm/gorm
 ```
 
 ## Drivers
@@ -43,8 +43,8 @@ db.host=/tmp/app.db  # Use db.host /tmp/app.db is your driver is sqlite
 package controllers
 
 import (
-    "github.com/revel/revel"
-    gormc "github.com/revel/modules/orm/gorm/app/controllers"
+    "github.com/str20tbl/revel"
+    gormc "github.com/str20tbl/modules/orm/gorm/app/controllers"
 )
 
 type App struct {
@@ -69,8 +69,8 @@ func (c App) Index() revel.Result {
 package controllers
 
 import (
-    "github.com/revel/revel"
-    gormc "github.com/revel/modules/orm/gorm/app/controllers"
+    "github.com/str20tbl/revel"
+    gormc "github.com/str20tbl/modules/orm/gorm/app/controllers"
 )
 
 type App struct {

@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/revel/revel"
+	"github.com/str20tbl/revel"
 )
 
 // allowMethods are HTTP methods that do NOT require a token.

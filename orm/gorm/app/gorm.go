@@ -22,7 +22,7 @@ import (
 
 	// mysql package.
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/revel/revel"
+	"github.com/str20tbl/revel"
 )
 
 // DB Gorm.

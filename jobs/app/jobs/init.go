@@ -1,7 +1,7 @@
 package jobs
 
 import (
-	"github.com/revel/revel"
+	"github.com/str20tbl/revel"
 )
 
 var jobLog = revel.AppLog

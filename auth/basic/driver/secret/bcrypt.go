@@ -3,7 +3,7 @@ package secret
 import (
 	"errors"
 
-	auth "github.com/revel/modules/auth/basic"
+	auth "github.com/str20tbl/modules/auth/basic"
 	"golang.org/x/crypto/bcrypt"
 )
 

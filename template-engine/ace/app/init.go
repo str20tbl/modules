@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/revel/revel"
+	"github.com/str20tbl/revel"
 	"github.com/yosssi/ace"
 )
 
