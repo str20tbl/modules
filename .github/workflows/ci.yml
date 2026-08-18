@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    # release/** is included so a release branch is verified by CI before it is
+    # merged and tagged. Tags are immutable once the Go module proxy caches them,
+    # so tagging must never be the first time CI sees the change.
+    branches: [master, 'release/**']
   pull_request:
     branches: [master]
 

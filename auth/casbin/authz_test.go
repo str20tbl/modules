@@ -24,10 +24,10 @@ var (
 	casbinModule *CasbinModule
 	testFilters  []revel.Filter
 
-	// mysqlReady reports whether TestMain managed to reach a MySQL server and
-	// build the fixture above. The filter tests need one; the adapter test does
-	// not.
-	mysqlReady bool
+	// testDbParams is the connection the fixture was actually built against:
+	// MySQL when one is reachable, otherwise a temporary sqlite3 database so the
+	// suite runs on any machine.
+	testDbParams gormdb.DbInfo
 )
 
 // DefaultDbParams returns the MySQL connection these tests run against. Every
@@ -68,36 +68,41 @@ func envIntOr(key string, fallback int) int {
 // initialisers, which meant an unreachable database took the whole test binary
 // down through revel's fatal logger before any test could skip.
 func TestMain(m *testing.M) {
-	params := DefaultDbParams()
-	addr := net.JoinHostPort(params.DbHost, strconv.Itoa(params.DbPort))
+	testDbParams = DefaultDbParams()
+	addr := net.JoinHostPort(testDbParams.DbHost, strconv.Itoa(testDbParams.DbPort))
 
 	if conn, err := net.DialTimeout("tcp", addr, 5*time.Second); err != nil {
-		fmt.Printf("no MySQL server reachable at %s (%v); MySQL-backed tests will skip\n", addr, err)
+		// Fall back to sqlite3 rather than skipping. The adapter is driven through
+		// gorm, so the same code paths are exercised either way, and the suite is
+		// then verifiable without a database server.
+		fmt.Printf("no MySQL server reachable at %s (%v); falling back to sqlite3\n", addr, err)
+
+		dir, err := os.MkdirTemp("", "casbin-test")
+		if err != nil {
+			fmt.Printf("could not create a temporary directory for sqlite3: %v\n", err)
+			os.Exit(1)
+		}
+		defer os.RemoveAll(dir)
+
+		testDbParams = gormdb.DbInfo{
+			DbDriver: "sqlite3",
+			DbHost:   filepath.Join(dir, "casbin.db"),
+		}
 	} else {
 		conn.Close()
+	}
 
-		adapter = NewAdapter(params)
-		enforcer = casbin.NewEnforcer("authz_model.conf", adapter)
-		casbinModule = NewCasbinModule(enforcer)
-		testFilters = []revel.Filter{
-			casbinModule.AuthzFilter,
-			func(c *revel.Controller, fc []revel.Filter) {
-				c.RenderHTML("OK.")
-			},
-		}
-		mysqlReady = true
+	adapter = NewAdapter(testDbParams)
+	enforcer = casbin.NewEnforcer("authz_model.conf", adapter)
+	casbinModule = NewCasbinModule(enforcer)
+	testFilters = []revel.Filter{
+		casbinModule.AuthzFilter,
+		func(c *revel.Controller, fc []revel.Filter) {
+			c.RenderHTML("OK.")
+		},
 	}
 
 	os.Exit(m.Run())
-}
-
-// requireMySQL skips a test that cannot run without the MySQL-backed fixture.
-func requireMySQL(t *testing.T) {
-	t.Helper()
-
-	if !mysqlReady {
-		t.Skip("no MySQL server available")
-	}
 }
 
 // TestAdapterOnFreshDatabase drives the adapter against an empty database, the
@@ -150,19 +155,24 @@ func initPolicy(t *testing.T) {
 	// so we need to load the policy from the file adapter (.CSV) first.
 	e := casbin.NewEnforcer("authz_model.conf", "authz_policy.csv")
 
-	a := NewAdapter(DefaultDbParams())
+	a := NewAdapter(testDbParams)
 	// This is a trick to save the current policy to the DB.
 	// We can't call e.SavePolicy() because the adapter in the enforcer is still the file adapter.
 	// The current policy means the policy in the Casbin enforcer (aka in memory).
 	err := a.SavePolicy(e.GetModel())
 	if err != nil {
-		panic(err)
+		t.Fatalf("SavePolicy: %v", err)
+	}
+
+	// The package-level enforcer loaded its policy from an empty table when
+	// TestMain built it, and it is the one casbinModule's filter consults. Without
+	// this reload it denies every request.
+	if err := enforcer.LoadPolicy(); err != nil {
+		t.Fatalf("LoadPolicy after saving the policy: %v", err)
 	}
 }
 
 func TestBasic(t *testing.T) {
-	requireMySQL(t)
-
 	// Initialize some policy in DB.
 	initPolicy(t)
 	// Note: you don't need to look at the above code
@@ -177,8 +187,6 @@ func TestBasic(t *testing.T) {
 }
 
 func TestPathWildcard(t *testing.T) {
-	requireMySQL(t)
-
 	// Initialize some policy in DB.
 	initPolicy(t)
 	// Note: you don't need to look at the above code
@@ -202,8 +210,6 @@ func TestPathWildcard(t *testing.T) {
 }
 
 func TestRBAC(t *testing.T) {
-	requireMySQL(t)
-
 	// Initialize some policy in DB.
 	initPolicy(t)
 	// Note: you don't need to look at the above code
