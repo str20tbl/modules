@@ -67,9 +67,11 @@ func CsrfFilter(c *revel.Controller, fc []revel.Filter) {
 	// If the Request method isn't in the white listed methods
 	if !allowedMethods[c.Request.Method] && !IsExempt(c) {
 		validToken := validToken(token, isSameOrigin, foundToken, c)
-		c.Log.Info("Validating route for token", "token", token, "wasfound", foundToken, "isvalid", validToken)
+		// Never log the token itself: it is a live session credential and would
+		// otherwise land in app logs on every state-changing request.
+		c.Log.Info("Validating route for CSRF token", "wasfound", foundToken, "isvalid", validToken)
 		if !validToken {
-			c.Log.Warn("Invalid CSRF token", "token", token, "wasfound", foundToken)
+			c.Log.Warn("Invalid CSRF token", "wasfound", foundToken)
 			return
 		}
 	}
