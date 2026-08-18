@@ -30,6 +30,11 @@ func NewAdapter(params gormdb.DbInfo) *Adapter {
 	gormdb.InitDBWithParameters(params)
 	a.db = gormdb.DB
 
+	// Ensure the backing table exists before anything tries to read it.
+	// LoadPolicy issues a plain SELECT, which errors against a database that has
+	// never held a policy.
+	a.createTable()
+
 	return a
 }
 
@@ -45,6 +50,12 @@ func (a *Adapter) createTable() {
 }
 
 func (a *Adapter) dropTable() {
+	// Symmetrical with createTable: SavePolicy drops before recreating, and on a
+	// database that has never held a policy there is nothing to drop.
+	if !a.db.HasTable(&Line{}) {
+		return
+	}
+
 	err := a.db.DropTable(&Line{}).Error
 	if err != nil {
 		panic(err)

@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
 
 	"github.com/casbin/casbin"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	gormdb "github.com/str20tbl/modules/orm/gorm/app"
 	"github.com/str20tbl/revel"
 )
@@ -21,6 +23,11 @@ var (
 	enforcer     *casbin.Enforcer
 	casbinModule *CasbinModule
 	testFilters  []revel.Filter
+
+	// mysqlReady reports whether TestMain managed to reach a MySQL server and
+	// build the fixture above. The filter tests need one; the adapter test does
+	// not.
+	mysqlReady bool
 )
 
 // DefaultDbParams returns the MySQL connection these tests run against. Every
@@ -56,7 +63,7 @@ func envIntOr(key string, fallback int) int {
 	return fallback
 }
 
-// TestMain builds the fixture only after a MySQL server has answered. The
+// TestMain builds the MySQL-backed fixture only once a server has answered. The
 // adapter, enforcer and module used to be built in package-level var
 // initialisers, which meant an unreachable database took the whole test binary
 // down through revel's fatal logger before any test could skip.
@@ -64,24 +71,61 @@ func TestMain(m *testing.M) {
 	params := DefaultDbParams()
 	addr := net.JoinHostPort(params.DbHost, strconv.Itoa(params.DbPort))
 
-	conn, err := net.DialTimeout("tcp", addr, 5*time.Second)
-	if err != nil {
-		fmt.Printf("skipping casbin tests: no MySQL server reachable at %s: %v\n", addr, err)
-		os.Exit(0)
-	}
-	conn.Close()
+	if conn, err := net.DialTimeout("tcp", addr, 5*time.Second); err != nil {
+		fmt.Printf("no MySQL server reachable at %s (%v); MySQL-backed tests will skip\n", addr, err)
+	} else {
+		conn.Close()
 
-	adapter = NewAdapter(params)
-	enforcer = casbin.NewEnforcer("authz_model.conf", adapter)
-	casbinModule = NewCasbinModule(enforcer)
-	testFilters = []revel.Filter{
-		casbinModule.AuthzFilter,
-		func(c *revel.Controller, fc []revel.Filter) {
-			c.RenderHTML("OK.")
-		},
+		adapter = NewAdapter(params)
+		enforcer = casbin.NewEnforcer("authz_model.conf", adapter)
+		casbinModule = NewCasbinModule(enforcer)
+		testFilters = []revel.Filter{
+			casbinModule.AuthzFilter,
+			func(c *revel.Controller, fc []revel.Filter) {
+				c.RenderHTML("OK.")
+			},
+		}
+		mysqlReady = true
 	}
 
 	os.Exit(m.Run())
+}
+
+// requireMySQL skips a test that cannot run without the MySQL-backed fixture.
+func requireMySQL(t *testing.T) {
+	t.Helper()
+
+	if !mysqlReady {
+		t.Skip("no MySQL server available")
+	}
+}
+
+// TestAdapterOnFreshDatabase drives the adapter against an empty database, the
+// case initPolicy's own comment describes as the starting state. NewAdapter did
+// not create its table, so LoadPolicy selected from a table that did not exist,
+// and SavePolicy's dropTable panicked because there was nothing to drop. This
+// runs on sqlite3 so it needs no server.
+func TestAdapterOnFreshDatabase(t *testing.T) {
+	params := gormdb.DbInfo{
+		DbDriver: "sqlite3",
+		DbHost:   filepath.Join(t.TempDir(), "casbin.db"),
+	}
+
+	a := NewAdapter(params)
+
+	fresh := casbin.NewEnforcer("authz_model.conf", "authz_policy.csv")
+	if err := a.SavePolicy(fresh.GetModel()); err != nil {
+		t.Fatalf("SavePolicy against a fresh database: %v", err)
+	}
+
+	loaded := casbin.NewEnforcer("authz_model.conf", a)
+	allowed, err := loaded.EnforceSafe("alice", "/dataset1/resource1", "GET")
+	if err != nil {
+		t.Fatalf("EnforceSafe: %v", err)
+	}
+	if !allowed {
+		t.Error("expected alice to be allowed GET /dataset1/resource1 after a round trip through the adapter")
+	}
 }
 
 func testRequest(t *testing.T, user string, path string, method string, code int) {
@@ -117,6 +161,8 @@ func initPolicy(t *testing.T) {
 }
 
 func TestBasic(t *testing.T) {
+	requireMySQL(t)
+
 	// Initialize some policy in DB.
 	initPolicy(t)
 	// Note: you don't need to look at the above code
@@ -131,6 +177,8 @@ func TestBasic(t *testing.T) {
 }
 
 func TestPathWildcard(t *testing.T) {
+	requireMySQL(t)
+
 	// Initialize some policy in DB.
 	initPolicy(t)
 	// Note: you don't need to look at the above code
@@ -154,6 +202,8 @@ func TestPathWildcard(t *testing.T) {
 }
 
 func TestRBAC(t *testing.T) {
+	requireMySQL(t)
+
 	// Initialize some policy in DB.
 	initPolicy(t)
 	// Note: you don't need to look at the above code
