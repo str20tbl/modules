@@ -44,7 +44,15 @@ func OpenDB(dbDriver string, dbInfo string) {
 		gormLog.Fatal("sql.Open failed", "error", err)
 	}
 	DB = db
-	singulartable := revel.Config.BoolDefault("db.singulartable", false)
+
+	// InitDBWithParameters is given every connection parameter explicitly, so
+	// this path must work outside a running Revel application, where
+	// revel.Config is nil. Fall back to the default rather than dereferencing
+	// it.
+	singulartable := false
+	if revel.Config != nil {
+		singulartable = revel.Config.BoolDefault("db.singulartable", false)
+	}
 	if singulartable {
 		DB.SingularTable(singulartable)
 	}
