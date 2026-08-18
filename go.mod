@@ -10,8 +10,8 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/jinzhu/gorm v1.9.12
 	github.com/newrelic/go-agent v3.4.0+incompatible
-	github.com/str20tbl/cron v0.0.0-20201020132948-031e64e1e03c
-	github.com/str20tbl/revel v0.0.0-20251103154036-57e898703110
+	github.com/str20tbl/cron v1.2.0
+	github.com/str20tbl/revel v1.2.0
 	github.com/tylerb/gls v0.0.0-20150407001822-e606233f194d
 	github.com/valyala/fasthttp v1.34.0
 	github.com/yosssi/ace v0.0.5
@@ -25,7 +25,6 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/inconshreveable/log15 v2.16.0+incompatible // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/juju/errors v0.0.0-20181118221551-089d3ea4e4d5 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
@@ -36,9 +35,9 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
 	github.com/poy/onpar v0.0.0-20200406201722-06f95a1c68e8 // indirect
-	github.com/str20tbl/config v0.0.0-20181008051942-a81c4105c368 // indirect
-	github.com/str20tbl/log15 v0.0.0-20171212200325-793412a67da6 // indirect
-	github.com/str20tbl/pathtree v0.0.0-20140121041023-41257a1839e9 // indirect
+	github.com/str20tbl/config v1.2.0 // indirect
+	github.com/str20tbl/log15 v1.2.0 // indirect
+	github.com/str20tbl/pathtree v1.2.0 // indirect
 	github.com/tylerb/is v2.1.4+incompatible // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

@@ -111,7 +111,7 @@ func (c Static) ServeModule(moduleName, prefix, filepath string) revel.Result {
 	if !found {
 		c.Log.Errorf("static: Module not found %s", moduleName)
 
-		return c.NotFound(moduleName)
+		return c.NotFound("%s", moduleName)
 	}
 
 	basePath = module.Path

@@ -43,6 +43,9 @@ func (ba *BcryptAuth) HashSecret(args ...interface{}) (string, error) {
 		if !ok {
 			return "", errors.New("wrong argument type provided, expected plaintext password as string")
 		}
+		if password == "" {
+			return "", errors.New("empty secret provided, expected a non-empty plaintext password")
+		}
 		hPass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			return "", err

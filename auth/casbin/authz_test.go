@@ -1,9 +1,14 @@
 package casbinauthz
 
 import (
+	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/casbin/casbin"
 	_ "github.com/go-sql-driver/mysql"
@@ -12,26 +17,71 @@ import (
 )
 
 var (
-	adapter      = NewAdapter(DefaultDbParams())
-	enforcer     = casbin.NewEnforcer("authz_model.conf", adapter)
-	casbinModule = NewCasbinModule(enforcer)
+	adapter      *Adapter
+	enforcer     *casbin.Enforcer
+	casbinModule *CasbinModule
+	testFilters  []revel.Filter
 )
 
-var testFilters = []revel.Filter{
-	casbinModule.AuthzFilter,
-	func(c *revel.Controller, fc []revel.Filter) {
-		c.RenderHTML("OK.")
-	},
-}
-
+// DefaultDbParams returns the MySQL connection these tests run against. Every
+// field can be overridden from the environment so CI can point the suite at a
+// service container.
 func DefaultDbParams() gormdb.DbInfo {
 	params := gormdb.DbInfo{}
 	params.DbDriver = "mysql"
-	params.DbHost = "(localhost:3306)"
-	params.DbUser = "root"
-	params.DbPassword = ""
-	params.DbName = "casbin"
+	params.DbHost = envOr("CASBIN_DB_HOST", "localhost")
+	params.DbPort = envIntOr("CASBIN_DB_PORT", 3306)
+	params.DbUser = envOr("CASBIN_DB_USER", "root")
+	params.DbPassword = os.Getenv("CASBIN_DB_PASSWORD")
+	params.DbName = envOr("CASBIN_DB_NAME", "casbin")
+
 	return params
+}
+
+func envOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+
+	return fallback
+}
+
+func envIntOr(key string, fallback int) int {
+	if v := os.Getenv(key); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+
+	return fallback
+}
+
+// TestMain builds the fixture only after a MySQL server has answered. The
+// adapter, enforcer and module used to be built in package-level var
+// initialisers, which meant an unreachable database took the whole test binary
+// down through revel's fatal logger before any test could skip.
+func TestMain(m *testing.M) {
+	params := DefaultDbParams()
+	addr := net.JoinHostPort(params.DbHost, strconv.Itoa(params.DbPort))
+
+	conn, err := net.DialTimeout("tcp", addr, 5*time.Second)
+	if err != nil {
+		fmt.Printf("skipping casbin tests: no MySQL server reachable at %s: %v\n", addr, err)
+		os.Exit(0)
+	}
+	conn.Close()
+
+	adapter = NewAdapter(params)
+	enforcer = casbin.NewEnforcer("authz_model.conf", adapter)
+	casbinModule = NewCasbinModule(enforcer)
+	testFilters = []revel.Filter{
+		casbinModule.AuthzFilter,
+		func(c *revel.Controller, fc []revel.Filter) {
+			c.RenderHTML("OK.")
+		},
+	}
+
+	os.Exit(m.Run())
 }
 
 func testRequest(t *testing.T, user string, path string, method string, code int) {

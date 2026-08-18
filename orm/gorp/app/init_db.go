@@ -39,7 +39,7 @@ func (dbGorp *DbGorp) InitDb(open bool) (err error) {
 		dbGorp.SqlStatementBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Question)
 		dbInfo.Dialect = gorp.SqliteDialect{}
 		if len(dbInfo.DbConnection) == 0 {
-			dbInfo.DbConnection = fmt.Sprintf(dbInfo.DbHost)
+			dbInfo.DbConnection = dbInfo.DbHost
 		}
 	case "ql":
 		fallthrough

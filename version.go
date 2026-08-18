@@ -6,11 +6,11 @@ package modules
 
 const (
 	// Version current Revel version
-	Version = "1.1.0"
+	Version = "1.2.0"
 
 	// BuildDate latest commit/release date
-	BuildDate = "2022-04-11"
+	BuildDate = "2026-08-18"
 
 	// MinimumGoVersion minimum required Go version for Revel
-	MinimumGoVersion = ">= go1.17"
+	MinimumGoVersion = ">= go1.24"
 )
